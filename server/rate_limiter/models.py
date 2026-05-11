@@ -6,8 +6,6 @@ from django_redis import get_redis_connection
 
 class Tier(models.Model):
     name = models.CharField(max_length=50, unique=True)
-    
-    # NOTE: REFERENCE ONLY. Actual enforcement is in the Envoy/Cilium Global Rate Limit YAML.
     max_requests_reference = models.IntegerField(default=100) 
 
     def __str__(self):

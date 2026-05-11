@@ -1,0 +1,62 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_DB: keycloak
+      POSTGRES_USER: keycloak
+      POSTGRES_PASSWORD: keycloak_password
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redisdata:/data
+
+  keycloak:
+    image: quay.io/keycloak/keycloak:23.0.0
+    command: start-dev
+    environment:
+      KC_DB: postgres
+      KC_DB_URL: jdbc:postgresql://postgres:5432/keycloak
+      KC_DB_USERNAME: keycloak
+      KC_DB_PASSWORD: keycloak_password
+      KEYCLOAK_ADMIN: admin
+      KEYCLOAK_ADMIN_PASSWORD: adminpassword
+    ports:
+      - "8080:8080"
+    depends_on:
+      - postgres
+
+  django:
+    build:
+      context: ./
+      dockerfile: Dockerfile
+    command: sh -c "python manage.py migrate && gunicorn core.wsgi:application --bind 0.0.0.0:8000"
+    environment:
+      DEBUG: "True"
+      DJANGO_SECRET_KEY: "your-super-secret-key-here"
+      REDIS_URL: "redis://redis:6379/0"
+      OIDC_RP_CLIENT_ID: "django-client"
+      OIDC_RP_CLIENT_SECRET: "your-client-secret"
+      OIDC_OP_AUTHORIZATION_ENDPOINT: "https://improved-engine-744566rjqxxhq9r-8080.app.github.dev/realms/myrealm/protocol/openid-connect/auth"
+      OIDC_OP_TOKEN_ENDPOINT: "http://keycloak:8080/realms/myrealm/protocol/openid-connect/token"
+      OIDC_OP_USER_ENDPOINT: "http://keycloak:8080/realms/myrealm/protocol/openid-connect/userinfo"
+      OIDC_OP_JWKS_ENDPOINT: "http://keycloak:8080/realms/myrealm/protocol/openid-connect/certs"
+      LOGIN_REDIRECT_URL: "/oidc/authenticate/"
+      LOGOUT_REDIRECT_URL: "/"
+    ports:
+      - "8000:8000"
+    depends_on:
+      - redis
+      - keycloak
+
+volumes:
+  pgdata:
+  redisdata:

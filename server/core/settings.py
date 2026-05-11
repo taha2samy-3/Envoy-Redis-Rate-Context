@@ -19,6 +19,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'mozilla_django_oidc',
     'rate_limiter',
+    'accounts',
 ]
 
 MIDDLEWARE = [
@@ -81,11 +82,12 @@ TIME_ZONE = 'UTC'
 USE_I18N = True
 USE_TZ = True
 STATIC_URL = 'static/'
+STATIC_ROOT = BASE_DIR / 'staticfiles'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 AUTHENTICATION_BACKENDS = (
-    'mozilla_django_oidc.auth.OIDCAuthenticationBackend', 
+    'accounts.auth_backends.CustomOIDCBackend',
     'django.contrib.auth.backends.ModelBackend',
 )
 
@@ -99,7 +101,7 @@ OIDC_OP_JWKS_ENDPOINT = config('OIDC_OP_JWKS_ENDPOINT')
 OIDC_CREATE_USER = True
 OIDC_RP_SIGN_ALGO = 'RS256'
 LOGIN_REDIRECT_URL = config("LOGIN_REDIRECT_URL","/")
-LOGOUT_REDIRECT_URL = config("LOGOUT_REDIRECT_URL","/")
+LOGOUT_REDIRECT_URL = config("LOGOUT_REDIRECT_URL","")
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
