@@ -1,0 +1,40 @@
+apiVersion: cilium.io/v2
+kind: CiliumClusterwideEnvoyConfig
+metadata:
+  name: ext-authz-idp-config
+spec:
+  resources:
+  - "@type": type.googleapis.com/envoy.config.cluster.v3.Cluster
+    name: keycloak-cluster
+    connect_timeout: 5s
+    type: STRICT_DNS
+    lb_policy: ROUND_ROBIN
+    load_assignment:
+      cluster_name: keycloak-cluster
+      endpoints:
+      - lb_endpoints:
+        - endpoint:
+            address:
+              socket_address:
+                address: my-keycloak.default.svc.cluster.local
+                port_value: 8080
+  - "@type": type.googleapis.com/envoy.config.core.v3.TypedExtensionConfig
+    name: ext-authz-filter
+    typed_config:
+      "@type": type.googleapis.com/envoy.extensions.filters.http.ext_authz.v3.ExtAuthz
+      transport_api_version: V3
+      http_service:
+        server_uri:
+          uri: http://keycloak-cluster
+          cluster: keycloak-cluster
+          timeout: 5s
+        authorization_request:
+          allowed_headers:
+            patterns:
+            - exact: cookie
+            - exact: authorization
+        authorization_response:
+          allowed_upstream_headers:
+            patterns:
+            - exact: x-auth-user
+            - exact: x-auth-groups

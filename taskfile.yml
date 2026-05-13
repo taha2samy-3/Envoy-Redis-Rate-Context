@@ -12,27 +12,44 @@ tasks:
     silent: true
     desc: "Delete the Kubernetes cluster created by Kind"
 
-  install-cilium:
+  cilium:install:
     desc: "Install Cilium with L7 and Gateway API"
     cmds:
+      - kubectl apply -f https://github.com/kubernetes-sigs/gateway-api/releases/download/v1.1.0/standard-install.yaml
       - cilium install --set gatewayAPI.enabled=true --set kubeProxyReplacement=true --set hostServices.enabled=true --set externalIPs.enabled=true
       - cilium status --wait
-  deploy-keycloak:
-    desc: "Deploy Keycloak"
-    cmds:
-      - kubectl apply -f infra/k8s/keycloak.yaml
-      - kubectl wait --for=condition=ready pod -l app=keycloak --timeout=90s
 
-  deploy-redis:
+  python-env:
+    cmds:
+      - cd ./server && python3 -m venv venv
+      - cd ./server && source venv/bin/activate && pip install requirments.txt 
+  redis:deploy:
     desc: "Install Redis HA using CloudPirates Chart"
     cmds:
       - helm upgrade --install my-redis oci://registry-1.docker.io/cloudpirates/redis 
         -f infra/helm/redis-values.yaml
-      - kubectl wait --for=condition=ready pod -l app.kubernetes.io/name=redis --timeout=120s
 
   deploy-keycloak:
     desc: "Install Keycloak using Bitnami Chart"
     cmds:
       - helm upgrade --install my-keycloak oci://registry-1.docker.io/bitnamicharts/keycloak 
         -f infra/helm/keycloak-values.yaml
-      - kubectl wait --for=condition=ready pod -l app.kubernetes.io/name=keycloak --timeout=150s
+
+
+  deploy-all:
+    desc: "Apply all Kubernetes manifests"
+    cmds:
+      - kubectl apply -f infra/k8s/django-configmap.yaml
+      - kubectl apply -f infra/k8s/django-deployment.yaml
+      - kubectl apply -f infra/k8s/django-service.yaml
+      - kubectl apply -f infra/k8s/gateway.yaml
+      - kubectl apply -f infra/k8s/envoy-auth-config.yaml
+      - kubectl apply -f infra/k8s/route-keycloak.yaml
+      - kubectl apply -f infra/k8s/route-django.yaml
+
+
+  django:build:
+    desc: "Build and load Django image into Kind"
+    cmds:
+      - docker build -t django-app:latest ./server
+      - kind load docker-image django-app:latest --name tetragon-lab

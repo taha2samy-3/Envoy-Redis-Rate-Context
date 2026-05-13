@@ -1,0 +1,22 @@
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: django-route
+  namespace: default
+spec:
+  parentRefs:
+  - name: my-gateway
+  rules:
+  - matches:
+    - path:
+        type: PathPrefix
+        value: /
+    filters:
+    - type: ExtensionRef
+      extensionRef:
+        group: cilium.io
+        kind: CiliumClusterwideEnvoyConfig
+        name: ext-authz-idp-config
+    backendRefs:
+    - name: django-service
+      port: 80
