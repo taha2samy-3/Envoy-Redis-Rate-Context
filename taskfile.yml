@@ -3,26 +3,33 @@ version: '3'
 tasks:
   cluster:create:
     cmds:
-      - kind create cluster --config=./infra/kind-config.yaml --name tetragon-lab
+      - kind create cluster --config=./infra/kind-config.yaml --name my-lab
     silent: true
     desc: "Create a Kubernetes cluster using Kind"
   cluster:delete:
     cmds:
-      - kind delete cluster --name tetragon-lab
+      - kind delete cluster --name my-lab
     silent: true
     desc: "Delete the Kubernetes cluster created by Kind"
 
   cilium:install:
-    desc: "Install Cilium with L7 and Gateway API"
-    cmds:
-      - kubectl apply -f https://github.com/kubernetes-sigs/gateway-api/releases/download/v1.1.0/standard-install.yaml
-      - cilium install --set gatewayAPI.enabled=true --set kubeProxyReplacement=true --set hostServices.enabled=true --set externalIPs.enabled=true
-      - cilium status --wait
+      desc: "Install Cilium with L7, Gateway API sand Kube-Proxy Replacement"
+      cmds:
+        - kubectl apply -f https://github.com/kubernetes-sigs/gateway-api/releases/download/v1.1.0/standard-install.yaml
+        - >
+          cilium install 
+          --set k8sServiceHost=my-lab-control-plane 
+          --set k8sServicePort=6443 
+          --set kubeProxyReplacement=true 
+          --set gatewayAPI.enabled=true 
+          --set hostServices.enabled=true 
+          --set externalIPs.enabled=true
+        - cilium status --wait
 
   python-env:
     cmds:
       - cd ./server && python3 -m venv venv
-      - cd ./server && source venv/bin/activate && pip install requirments.txt 
+      - cd ./server && source venv/bin/activate && pip install requirments.txt && python3 setup_kc.py
   redis:deploy:
     desc: "Install Redis HA using CloudPirates Chart"
     cmds:
@@ -52,4 +59,4 @@ tasks:
     desc: "Build and load Django image into Kind"
     cmds:
       - docker build -t django-app:latest ./server
-      - kind load docker-image django-app:latest --name tetragon-lab
+      - kind load docker-image django-app:latest --name my-lab
