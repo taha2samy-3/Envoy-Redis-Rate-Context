@@ -29,19 +29,18 @@ tasks:
   python-env:
     cmds:
       - cd ./server && python3 -m venv venv
-      - cd ./server && source venv/bin/activate && pip install requirments.txt && python3 setup_kc.py
-  redis:deploy:
-    desc: "Install Redis HA using CloudPirates Chart"
+      - cd ./server && . venv/bin/activate && pip install -r requirements.txt && python3 setup_kc.py
+
+  deploy-redis:
+    desc: "Deploy Redis using CloudPirates OCI Chart"
     cmds:
-      - helm upgrade --install my-redis oci://registry-1.docker.io/cloudpirates/redis 
-        -f infra/helm/redis-values.yaml
+      - helm upgrade --install my-redis oci://registry-1.docker.io/cloudpirates/redis -f infra/redis-values.yaml
+
 
   deploy-keycloak:
     desc: "Install Keycloak using Bitnami Chart"
     cmds:
-      - helm upgrade --install my-keycloak oci://registry-1.docker.io/bitnamicharts/keycloak 
-        -f infra/helm/keycloak-values.yaml
-
+      - helm upgrade --install my-keycloak oci://registry-1.docker.io/cloudpirates/keycloak -f infra/keycloak-values.yaml
 
   deploy-all:
     desc: "Apply all Kubernetes manifests"

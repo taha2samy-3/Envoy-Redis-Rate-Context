@@ -1,9 +1,16 @@
-architecture: replication
-replicaCount: 3
-sentinel:
-  enabled: true
-metrics:
-  enabled: true
+architecture: standalone
+
+auth:
+  enabled: false
+
 persistence:
   enabled: true
-  size: 5Gi
+  size: 1Gi 
+service:
+  type: ClusterIP
+  port: 6379
+
+containerSecurityContext:
+  runAsUser: 999
+  runAsGroup: 999
+  readOnlyRootFilesystem: true

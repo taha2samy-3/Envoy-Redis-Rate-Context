@@ -1,12 +1,26 @@
-auth:
+keycloak:
   adminUser: admin
   adminPassword: adminpassword
-production: false 
-httpEnabled: true
-proxyHeaders: "x-forwarded"
-postgresql:
+  production: false
+  httpEnabled: true
+  proxyHeaders: "xforwarded"
+  hostnameStrict: false
+  hostnameStrictHttps: false
+  extraArgs: 
+    - "--http-host=0.0.0.0"
+    - "--hostname-strict=false"
+
+livenessProbe:
+  enabled: false
+readinessProbe:
+  enabled: false
+
+postgres:
   enabled: true
-  persistence:
-    size: 5Gi
-service:
-  type: ClusterIP
+  auth:
+    database: "keycloak"
+    password: "keycloak-db-password"
+
+persistence:
+  enabled: true
+  size: 2Gi
