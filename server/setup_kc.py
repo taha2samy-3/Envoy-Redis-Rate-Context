@@ -5,7 +5,7 @@ from keycloak import KeycloakAdmin
 KC_URL = "http://localhost:8080/"
 DJANGO_URL = "http://localhost:8000/"
 ADMIN_USER = "admin"
-ADMIN_PASS = "adminpassword"
+ADMIN_PASS = "admin123"
 REALM_NAME = "myrealm"
 CLIENT_ID = "django-client"
 # ---------------------
@@ -79,6 +79,10 @@ def setup():
         print(f"YOUR CLIENT SECRET: {secret}")
         print("="*50)
         print("\nCopy this secret into your docker-compose.yml for OIDC_RP_CLIENT_SECRET")
+
+
+        with open("secret.txt", "w") as file:
+            file.write(f"{secret}\n")
 
     except Exception as e:
         print(f"[!] Error: {str(e)}")
