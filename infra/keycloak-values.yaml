@@ -1,26 +1,33 @@
-keycloak:
+image:
+  registry: docker.io
+  repository: bitnamilegacy/keycloak
+  tag: 26.1.0
+  pullPolicy: IfNotPresent
+
+auth:
   adminUser: admin
-  adminPassword: adminpassword
-  production: false
-  httpEnabled: true
-  proxyHeaders: "xforwarded"
-  hostnameStrict: false
-  hostnameStrictHttps: false
-  extraArgs: 
-    - "--http-host=0.0.0.0"
-    - "--hostname-strict=false"
+  adminPassword: "SuperSecureAdminPassword123"
 
-livenessProbe:
-  enabled: false
-readinessProbe:
-  enabled: false
+service:
+  type: ClusterIP
+  ports:
+    http: 80
+    https: 443
 
-postgres:
+production: false
+
+postgresql:
   enabled: true
+  image:
+    registry: docker.io
+    repository: bitnamilegacy/postgresql
+    tag: 16.4.0
   auth:
-    database: "keycloak"
-    password: "keycloak-db-password"
-
-persistence:
-  enabled: true
-  size: 2Gi
+    postgresPassword: "PostgresSuperPassword123"
+    username: bn_keycloak
+    password: "KeycloakDBPassword123"
+    database: bitnami_keycloak
+  primary:
+    persistence:
+      enabled: true
+      size: 2Gi

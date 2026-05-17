@@ -8,18 +8,6 @@ networking:
 
 nodes:
 - role: control-plane
-  extraMounts:
-    - hostPath: /proc
-      containerPath: /procHost
 - role: worker
-  extraMounts:
-    - hostPath: /proc
-      containerPath: /procHost
 - role: worker
-  extraMounts:
-    - hostPath: /proc
-      containerPath: /procHost
 - role: worker
-  extraMounts:
-    - hostPath: /proc
-      containerPath: /procHost
