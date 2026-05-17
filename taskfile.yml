@@ -36,12 +36,13 @@ tasks:
     cmds:
       - helm upgrade --install my-redis oci://registry-1.docker.io/cloudpirates/redis -f infra/redis-values.yaml
 
-  deploy-keycloak:
+  keycloak:deploy:
     cmds:
-      - helm repo add bitnami https://charts.bitnami.com/bitnami
-      - helm upgrade --install my-keycloak bitnami/keycloak -f infra/keycloak-values.yaml
+      - helm upgrade --install keycloak oci://registry-1.docker.io/cloudpirates/keycloak -f infra/keycloak-values.yaml
       - kubectl get pods -w
-
+  keycloak:uninstall:
+    cmds:
+      - helm uninstall keycloak
 
   deploy-all:
     desc: "Apply all Kubernetes manifests"

@@ -1,5 +1,5 @@
 {
-    "name": "Tetragon Labs Environment",
+    "name": "envoycontext",
     "build": {
         "dockerfile": "dockerfile"
     },
