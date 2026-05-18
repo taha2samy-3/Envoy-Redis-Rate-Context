@@ -16,7 +16,7 @@ spec:
         - endpoint:
             address:
               socket_address:
-                address: my-keycloak.default.svc.cluster.local
+                address: keycloak.default.svc.cluster.local
                 port_value: 8080
   - "@type": type.googleapis.com/envoy.config.core.v3.TypedExtensionConfig
     name: ext-authz-filter
