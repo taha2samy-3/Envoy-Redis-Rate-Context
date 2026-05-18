@@ -3,7 +3,7 @@ from keycloak import KeycloakAdmin
 import base64
 # --- CONFIGURATION ---
 KC_URL = "http://localhost:8080/"
-DJANGO_URL = "http://localhost:8000/"
+DJANGO_URL = "http://172.18.255.200/"
 ADMIN_USER = "admin"
 ADMIN_PASS = "admin123"
 REALM_NAME = "myrealm"
