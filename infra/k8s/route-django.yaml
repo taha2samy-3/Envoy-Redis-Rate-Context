@@ -18,5 +18,5 @@ spec:
         kind: CiliumClusterwideEnvoyConfig
         name: ext-authz-idp-config
     backendRefs:
-    - name: django-service.default.svc.cluster.local
+    - name: django-service
       port: 80

@@ -42,8 +42,9 @@ tasks:
   deploy-redis:
     desc: "Deploy Redis using CloudPirates OCI Chart"
     cmds:
-      - helm upgrade --install my-redis oci://registry-1.docker.io/cloudpirates/redis -f infra/redis-values.yaml
-
+      - helm repo add bitnami https://charts.bitnami.com/bitnami
+      - helm repo update
+      - helm upgrade --install my-redis bitnami/redis -f infra/redis-values.yaml
   keycloak:deploy:
     cmds:
       - helm upgrade --install keycloak oci://registry-1.docker.io/cloudpirates/keycloak -f infra/keycloak-values.yaml
@@ -74,7 +75,6 @@ tasks:
       - kubectl apply -f infra/k8s/envoy-auth-config.yaml
       - kubectl apply -f infra/k8s/route-keycloak.yaml
       - kubectl apply -f infra/k8s/route-django.yaml
-
 
   django:build:
     desc: "Build and load Django image into Kind"

@@ -2,53 +2,66 @@ apiVersion: cilium.io/v2
 kind: CiliumClusterwideEnvoyConfig
 metadata:
   name: ext-authz-idp-config
-
 spec:
+  backendServices:
+    - name: oauth2-proxy
+      namespace: default
+      number:
+        - "4180"
   resources:
-
-  # Envoy cluster configuration for oauth2-proxy
   - "@type": type.googleapis.com/envoy.config.cluster.v3.Cluster
-    name: oauth2-proxy-cluster
+    name: "k8s/default/oauth2-proxy:4180"
     connect_timeout: 5s
-    type: STRICT_DNS
+    type: LOGICAL_DNS
     lb_policy: ROUND_ROBIN
-
     load_assignment:
-      cluster_name: oauth2-proxy-cluster
+      cluster_name: "k8s/default/oauth2-proxy:4180"
       endpoints:
-      - lb_endpoints:
-        - endpoint:
-            address:
-              socket_address:
-                # Points to the oauth2-proxy Kubernetes Service
-                address: oauth2-proxy.default.svc.cluster.local
-                port_value: 4180
-
-  # External authorization filter configuration
-  - "@type": type.googleapis.com/envoy.config.core.v3.TypedExtensionConfig
-    name: ext-authz-filter
-
-    typed_config:
-      "@type": type.googleapis.com/envoy.extensions.filters.http.ext_authz.v3.ExtAuthz
-      transport_api_version: V3
-
-      http_service:
-        server_uri:
-          uri: http://oauth2-proxy-cluster
-          cluster: oauth2-proxy-cluster
-          timeout: 5s
-
-        # Headers forwarded from the client request to oauth2-proxy
-        authorization_request:
-          allowed_headers:
-            patterns:
-            - exact: cookie
-            - exact: authorization
-
-        # Headers returned by oauth2-proxy and forwarded upstream to Django
-        authorization_response:
-          allowed_upstream_headers:
-            patterns:
-            - exact: authorization        # Contains the JWT token
-            - exact: x-auth-request-user  # Contains the username
-            - exact: x-auth-request-email # Contains the user email
+        - lb_endpoints:
+            - endpoint:
+                address:
+                  socket_address:
+                    address: oauth2-proxy.default.svc.cluster.local
+                    port_value: 4180
+  - "@type": type.googleapis.com/envoy.config.listener.v3.Listener
+    name: cilium-gateway-default-my-gateway
+    address:
+      socket_address:
+        address: 0.0.0.0
+        port_value: 80
+    filter_chains:
+      - filters:
+          - name: envoy.filters.network.http_connection_manager
+            typed_config:
+              "@type": type.googleapis.com/envoy.extensions.filters.network.http_connection_manager.v3.HttpConnectionManager
+              stat_prefix: ingress_http
+              rds:
+                config_source:
+                  ads: {}
+                  resource_api_version: V3
+                route_config_name: cilium-gateway-default-my-gateway
+              http_filters:
+                - name: envoy.filters.http.ext_authz
+                  typed_config:
+                    "@type": type.googleapis.com/envoy.extensions.filters.http.ext_authz.v3.ExtAuthz
+                    transport_api_version: V3
+                    failure_mode_allow: false
+                    http_service:
+                      server_uri:
+                        uri: http://cluster.local
+                        cluster: "k8s/default/oauth2-proxy:4180"
+                        timeout: 5s
+                      authorization_request:
+                        allowed_headers:
+                          patterns:
+                            - exact: cookie
+                            - exact: authorization
+                      authorization_response:
+                        allowed_upstream_headers:
+                          patterns:
+                            - exact: authorization
+                            - exact: x-auth-request-user
+                            - exact: x-auth-request-email
+                - name: envoy.filters.http.router
+                  typed_config:
+                    "@type": type.googleapis.com/envoy.extensions.filters.http.router.v3.Router
