@@ -19,7 +19,7 @@ tasks:
   cilium:install:
       desc: "Install Cilium with L7, Gateway API sand Kube-Proxy Replacement"
       cmds:
-        - kubectl apply -f https://github.com/kubernetes-sigs/gateway-api/releases/download/v1.1.0/standard-install.yaml
+        - kubectl apply --server-side -f https://github.com/kubernetes-sigs/gateway-api/releases/download/v1.5.0/standard-install.yaml
         - >
           cilium install 
           --set k8sServiceHost=my-lab-control-plane 
