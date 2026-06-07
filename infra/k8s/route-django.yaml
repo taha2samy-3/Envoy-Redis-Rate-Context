@@ -15,8 +15,13 @@ spec:
     - type: ExtensionRef
       extensionRef:
         group: cilium.io
-        kind: CiliumClusterwideEnvoyConfig
+        kind: CiliumExternalAuth
         name: ext-authz-idp-config
+    - type: ResponseHeaderModifier
+      responseHeaderModifier:
+        remove:
+        - x-auth-request-user
+        - x-auth-request-email
     backendRefs:
     - name: django-service
       port: 80
