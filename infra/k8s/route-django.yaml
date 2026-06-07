@@ -12,11 +12,22 @@ spec:
         type: PathPrefix
         value: /
     filters:
-    - type: ExtensionRef
-      extensionRef:
-        group: cilium.io
-        kind: CiliumExternalAuth
-        name: ext-authz-idp-config
+    - type: ExternalAuth
+      externalAuth:
+        protocol: HTTP
+        backendRef:
+          group: ""
+          kind: Service
+          name: oauth2-proxy
+          port: 4180
+        http:
+          allowedHeaders:
+          - cookie
+          - authorization
+          allowedResponseHeaders:
+          - authorization
+          - x-auth-request-user
+          - x-auth-request-email
     - type: ResponseHeaderModifier
       responseHeaderModifier:
         remove:

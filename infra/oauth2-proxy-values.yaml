@@ -11,7 +11,7 @@ extraEnv:
   
 extraArgs:
   provider: "oidc"
-  oidc-issuer-url: "http://keycloak.default.svc.cluster.local:8080/realms/myrealm"
+  oidc-issuer-url: "http://172.18.255.200/realms/myrealm"
   cookie-secure: "false"
   cookie-domain: ""
   pass-access-token: "true"

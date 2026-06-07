@@ -72,7 +72,6 @@ tasks:
       - kubectl apply -f infra/k8s/django-deployment.yaml
       - kubectl apply -f infra/k8s/django-service.yaml
       - kubectl apply -f infra/k8s/gateway.yaml
-      - kubectl apply -f infra/k8s/cilium-external-auth.yaml
       - kubectl apply -f infra/k8s/route-keycloak.yaml
       - kubectl apply -f infra/k8s/route-django.yaml
 
